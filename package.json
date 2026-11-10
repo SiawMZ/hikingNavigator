@@ -1,0 +1,25 @@
+{
+  "name": "hiking-navigator-pilot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "import-gpx": "node scripts/import-gpx.mjs",
+    "qr": "node scripts/make-qr.mjs",
+    "demo": "node scripts/make-demo.mjs"
+  },
+  "dependencies": {
+    "maplibre-gl": "^6.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "qrcode": "^1.5.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.7",
+    "vitest": "^5.1.0"
+  }
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "padang-summit",
+    "hill": "Bukit Padang",
+    "name": {
+      "en": "Padang summit trail",
+      "ms": "Denai puncak Padang"
+    },
+    "status": "open",
+    "distanceM": 1625,
+    "ascentM": 185,
+    "minutes": 38,
+    "start": [
+      116.108807,
+      5.952727
+    ]
+  },
+  {
+    "id": "demo-loop",
+    "hill": "Demo",
+    "name": {
+      "en": "Demo loop",
+      "ms": "Laluan demo"
+    },
+    "demo": true,
+    "status": "open",
+    "distanceM": 997,
+    "ascentM": 56,
+    "minutes": 18,
+    "start": [
+      116.1154,
+      5.9467
+    ]
+  }
+]
