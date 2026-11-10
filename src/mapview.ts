@@ -37,6 +37,9 @@ export class TrailMap {
   private line: LngLat[];
   private cum: number[];
   private me: Marker | null = null;
+  private heading: number | null = null;
+  /** The beam's current CSS angle, which may run past 360. */
+  private beamAngle: number | null = null;
   private junctionEls: HTMLElement[] = [];
   private ready: Promise<void>;
   /** Stops following the user once they drag the map. */
@@ -143,15 +146,36 @@ export class TrailMap {
       return;
     }
     if (!this.me) {
+      // The beam sits under the dot, so they are two children of one marker.
       const el = document.createElement('div');
       el.className = 'pin-me';
+      el.innerHTML = '<div class="pin-beam"></div><div class="pin-dot"></div>';
       this.me = new Marker({ element: el }).setLngLat(at).addTo(this.map);
+      this.setHeading(this.heading);
     }
     this.me.setLngLat(at);
     this.me.getElement().classList.toggle('is-off', offRoute);
     if (this.following) {
       this.map.easeTo({ center: at, zoom: Math.max(this.map.getZoom(), 16), duration: 600 });
     }
+  }
+
+  /** Points the beam on the blue dot (0 = north), or hides it with null. */
+  setHeading(degrees: number | null): void {
+    this.heading = degrees;
+    const beam = this.me?.getElement().querySelector<HTMLElement>('.pin-beam');
+    if (!beam) return;
+    beam.hidden = degrees === null;
+    if (degrees === null) {
+      this.beamAngle = null;
+      return;
+    }
+    // The map is kept north-up, but allow for a turned map all the same.
+    const target = degrees - this.map.getBearing();
+    // Keep counting past 360 so the animation turns the short way through north.
+    this.beamAngle =
+      this.beamAngle === null ? target : this.beamAngle + ((((target - this.beamAngle) % 360) + 540) % 360) - 180;
+    beam.style.transform = `translate(-50%, -50%) rotate(${this.beamAngle}deg)`;
   }
 
   /** Draws the walked part of the route in black. */

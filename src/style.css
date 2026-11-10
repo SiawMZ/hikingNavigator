@@ -532,15 +532,40 @@ a {
 }
 
 .pin-me {
+  --me: 28 126 214;
+  position: relative;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  background: #1c7ed6;
-  border: 3px solid #fff;
-  box-shadow: 0 0 0 6px rgb(28 126 214 / 0.25);
 }
 
 .pin-me.is-off {
-  background: var(--danger);
-  box-shadow: 0 0 0 6px rgb(201 42 42 / 0.25);
+  --me: 201 42 42;
+}
+
+.pin-dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgb(var(--me));
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 6px rgb(var(--me) / 0.25);
+}
+
+/* A 70° wedge that fades out, pointing the way the phone faces. */
+.pin-beam {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: conic-gradient(from -35deg, rgb(var(--me) / 0.5) 0deg 70deg, transparent 70deg);
+  mask-image: radial-gradient(circle, #000 15%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: transform 0.2s linear;
+  pointer-events: none;
+}
+
+.pin-beam[hidden] {
+  display: none;
 }

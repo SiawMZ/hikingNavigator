@@ -1,6 +1,7 @@
 import { loadTrail } from '../data';
 import { fill, h } from '../dom';
-import type { LngLat } from '../geo';
+import { requestCompass, watchCompass } from '../compass';
+import { bearing, haversine, type LngLat } from '../geo';
 import { downloadGpx } from '../gpx';
 import { formatDistance, formatMinutes, t, tr, type StringKey } from '../i18n';
 import { simulate, watchGps, type LocationSource, type SimMode } from '../location';
@@ -24,6 +25,7 @@ interface Session {
   lastFix: Fix | null;
   snoozeTimer: number | null;
   wakeLock: WakeLockSentinel | null;
+  stopCompass: () => void;
 }
 
 function elevationProfile(trail: Trail): HTMLElement {
@@ -311,6 +313,10 @@ export async function trailView(root: HTMLElement, id: string, rerender: () => v
   function onFix(fix: Fix): void {
     const s = session;
     if (!s) return;
+    // A pretend walk has no compass: point the beam the way it is moving.
+    if (simMode && s.lastFix && haversine([s.lastFix.lng, s.lastFix.lat], [fix.lng, fix.lat]) > 2) {
+      map.setHeading(bearing([s.lastFix.lng, s.lastFix.lat], [fix.lng, fix.lat]));
+    }
     s.lastFix = fix;
     for (const event of s.nav.update(fix)) {
       if (event.type === 'cue') {
@@ -352,6 +358,8 @@ export async function trailView(root: HTMLElement, id: string, rerender: () => v
     const s = session;
     if (!s) return;
     s.source.stop();
+    s.stopCompass();
+    map.setHeading(null);
     if (s.snoozeTimer) clearTimeout(s.snoozeTimer);
     void s.wakeLock?.release();
     session = null;
@@ -371,8 +379,17 @@ export async function trailView(root: HTMLElement, id: string, rerender: () => v
           stop();
           setBanner('danger', t('noPermission'));
         });
-    session = { nav, source, startedAt: Date.now(), reverse, junctions: ordered, lastFix: null, snoozeTimer: null, wakeLock: null };
+    session = { nav, source, startedAt: Date.now(), reverse, junctions: ordered, lastFix: null, snoozeTimer: null, wakeLock: null, stopCompass: () => {} };
     void keepScreenOn();
+    if (!simMode) {
+      const mine = session;
+      // Asked here, straight after the tap, because an iPhone only asks then.
+      // Listen whatever the answer: if it was no, no readings arrive and the
+      // beam stays hidden. Skip if the walk was stopped while it was asking.
+      void requestCompass().then(() => {
+        if (session === mine) mine.stopCompass = watchCompass((degrees) => map.setHeading(degrees));
+      });
+    }
     if (!reverse) track('start', tl.id);
     // Save in the background while there is still signal, so the page can
     // reopen on the trail even if the browser closes it with no signal.
