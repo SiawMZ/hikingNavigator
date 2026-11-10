@@ -374,6 +374,14 @@ export async function trailView(root: HTMLElement, id: string, rerender: () => v
     session = { nav, source, startedAt: Date.now(), reverse, junctions: ordered, lastFix: null, snoozeTimer: null, wakeLock: null };
     void keepScreenOn();
     if (!reverse) track('start', tl.id);
+    // Save in the background while there is still signal, so the page can
+    // reopen on the trail even if the browser closes it with no signal.
+    if (offlineSupported() && navigator.onLine && !isSaved(tl.id)) {
+      saveTrailOffline(tl).then(
+        () => track('offline', tl.id),
+        () => {},
+      );
+    }
     map.setFollowing(true);
     renderNav();
   }

@@ -63,6 +63,10 @@ npm run qr -- https://your-site.pages.dev
 
 Writes one SVG per real trail into `qr/`. The link ends in `?s=qr`, so scans are counted separately from other visits. Print with a short code under each (for example `PADANG-5`) in case a sticker is scratched, and get **written permission from DBKK** before putting anything up at Bukit Padang.
 
+## Offline
+
+Tapping **Start trail** saves the trail for offline use in the background (page, trail, map tiles around it), as long as there is signal at that moment. The **Save for offline** button does the same before you leave home. Once a walk has started, losing signal does not stop GPS, junction cues or alerts; the saved copy matters only if the page is closed or reloaded with no signal.
+
 ## What is not done yet
 
 - Tested on a laptop with a pretend walk only. **Walk it on a real phone before printing anything**: the junction cue distance (40 m), off-route distance (25 m, three readings in a row) and the GPS accuracy limit (30 m) in `src/nav.ts` are starting values from the research.
